@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Web Game Engine</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/editor.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/themes.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loading-content">
+                <div class="engine-logo">
+                    <i class="fas fa-gamepad"></i>
+                    <h1>Advanced Web Game Engine</h1>
+                </div>
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+                <div class="loading-text">Initializing Engine...</div>
+            </div>
+        </div>
+
+        <!-- Main Editor Interface -->
+        <div id="editor" class="editor-container" style="display: none;">
+            <!-- Top Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <button id="new-project" class="toolbar-btn">
+                        <i class="fas fa-plus"></i> New Project
+                    </button>
+                    <button id="open-project" class="toolbar-btn">
+                        <i class="fas fa-folder-open"></i> Open
+                    </button>
+                    <button id="save-project" class="toolbar-btn">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                    <div class="toolbar-separator"></div>
+                    <button id="play-btn" class="toolbar-btn play-btn">
+                        <i class="fas fa-play"></i> Play
+                    </button>
+                    <button id="pause-btn" class="toolbar-btn">
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+                    <button id="stop-btn" class="toolbar-btn">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+                <div class="toolbar-center">
+                    <div class="project-info">
+                        <span id="project-name">Untitled Project</span>
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <button id="settings-btn" class="toolbar-btn">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <button id="help-btn" class="toolbar-btn">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="main-content">
+                <!-- Left Panel - Project Explorer -->
+                <div class="panel project-explorer">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-folder"></i> Project Explorer</h3>
+                        <div class="panel-controls">
+                            <button class="panel-btn" id="add-asset">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="panel-btn" id="refresh-explorer">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div id="project-tree" class="project-tree">
+                            <!-- Project tree will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center Panel - Scene View -->
+                <div class="panel scene-view">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-cube"></i> Scene View</h3>
+                        <div class="panel-controls">
+                            <button class="panel-btn" id="translate-tool" title="Translate Tool">
+                                <i class="fas fa-arrows-alt"></i>
+                            </button>
+                            <button class="panel-btn" id="rotate-tool" title="Rotate Tool">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                            <button class="panel-btn" id="scale-tool" title="Scale Tool">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                            </button>
+                            <button class="panel-btn" id="select-tool" title="Select Tool">
+                                <i class="fas fa-mouse-pointer"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <canvas id="scene-canvas" class="scene-canvas"></canvas>
+                        <div class="scene-overlay">
+                            <div class="scene-stats">
+                                <span id="fps-counter">FPS: 60</span>
+                                <span id="draw-calls">Draw Calls: 0</span>
+                                <span id="triangle-count">Triangles: 0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel - Inspector -->
+                <div class="panel inspector">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-cogs"></i> Inspector</h3>
+                    </div>
+                    <div class="panel-content">
+                        <div id="inspector-content" class="inspector-content">
+                            <!-- Inspector content will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Panel - Console -->
+            <div class="panel console">
+                <div class="panel-header">
+                    <h3><i class="fas fa-terminal"></i> Console</h3>
+                    <div class="panel-controls">
+                        <button class="panel-btn" id="clear-console">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="panel-btn" id="toggle-console">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div id="console-output" class="console-output">
+                        <!-- Console output will be populated by JavaScript -->
+                    </div>
+                    <div class="console-input">
+                        <input type="text" id="console-input" placeholder="Enter command...">
+                        <button id="console-execute">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <div id="modal-overlay" class="modal-overlay" style="display: none;">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 id="modal-title">Modal Title</h3>
+                    <button class="modal-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-content" id="modal-content">
+                    <!-- Modal content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Context Menus -->
+        <div id="context-menu" class="context-menu" style="display: none;">
+            <!-- Context menu items will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="scripts/core/Engine.js"></script>
+    <script src="scripts/core/MemoryManager.js"></script>
+    <script src="scripts/core/Logger.js"></script>
+    <script src="scripts/core/EventSystem.js"></script>
+    <script src="scripts/core/AssetManager.js"></script>
+    <script src="scripts/core/SceneManager.js"></script>
+    <script src="scripts/core/EntityComponentSystem.js"></script>
+    
+    <script src="scripts/math/MathUtils.js"></script>
+    <script src="scripts/math/Vector2.js"></script>
+    <script src="scripts/math/Vector3.js"></script>
+    <script src="scripts/math/Vector4.js"></script>
+    <script src="scripts/math/Matrix3.js"></script>
+    <script src="scripts/math/Matrix4.js"></script>
+    <script src="scripts/math/Quaternion.js"></script>
+    <script src="scripts/math/Transform.js"></script>
+    <script src="scripts/math/BoundingBox.js"></script>
+    <script src="scripts/math/BoundingSphere.js"></script>
+    <script src="scripts/math/Ray.js"></script>
+    <script src="scripts/math/Plane.js"></script>
+    <script src="scripts/math/Frustum.js"></script>
+    
+    <script src="scripts/rendering/Renderer.js"></script>
+    <script src="scripts/rendering/Shader.js"></script>
+    <script src="scripts/rendering/Material.js"></script>
+    <script src="scripts/rendering/Mesh.js"></script>
+    <script src="scripts/rendering/Texture.js"></script>
+    <script src="scripts/rendering/Camera.js"></script>
+    <script src="scripts/rendering/Light.js"></script>
+    <script src="scripts/rendering/PostProcessor.js"></script>
+    
+    <script src="scripts/physics/PhysicsEngine.js"></script>
+    <script src="scripts/physics/RigidBody.js"></script>
+    <script src="scripts/physics/Collider.js"></script>
+    <script src="scripts/physics/PhysicsMaterial.js"></script>
+    <script src="scripts/physics/Constraint.js"></script>
+    
+    <script src="scripts/audio/AudioEngine.js"></script>
+    <script src="scripts/audio/AudioSource.js"></script>
+    <script src="scripts/audio/AudioListener.js"></script>
+    <script src="scripts/audio/AudioClip.js"></script>
+    
+    <script src="scripts/input/InputManager.js"></script>
+    <script src="scripts/input/Keyboard.js"></script>
+    <script src="scripts/input/Mouse.js"></script>
+    <script src="scripts/input/Gamepad.js"></script>
+    <script src="scripts/input/Touch.js"></script>
+    
+    <script src="scripts/scripting/ScriptEngine.js"></script>
+    <script src="scripts/scripting/ScriptComponent.js"></script>
+    <script src="scripts/scripting/ScriptManager.js"></script>
+    
+    <script src="scripts/networking/NetworkManager.js"></script>
+    <script src="scripts/networking/NetworkComponent.js"></script>
+    <script src="scripts/networking/NetworkMessage.js"></script>
+    
+    <script src="scripts/editor/Editor.js"></script>
+    <script src="scripts/editor/SceneEditor.js"></script>
+    <script src="scripts/editor/Inspector.js"></script>
+    <script src="scripts/editor/ProjectExplorer.js"></script>
+    <script src="scripts/editor/Console.js"></script>
+    <script src="scripts/editor/AssetBrowser.js"></script>
+    <script src="scripts/editor/MaterialEditor.js"></script>
+    <script src="scripts/editor/AnimationEditor.js"></script>
+    <script src="scripts/editor/TerrainEditor.js"></script>
+    
+    <script src="scripts/components/Component.js"></script>
+    <script src="scripts/components/TransformComponent.js"></script>
+    <script src="scripts/components/MeshRenderer.js"></script>
+    <script src="scripts/components/CameraComponent.js"></script>
+    <script src="scripts/components/LightComponent.js"></script>
+    <script src="scripts/components/RigidBodyComponent.js"></script>
+    <script src="scripts/components/ColliderComponent.js"></script>
+    <script src="scripts/components/AudioSourceComponent.js"></script>
+    <script src="scripts/components/AudioListenerComponent.js"></script>
+    <script src="scripts/components/ScriptComponent.js"></script>
+    <script src="scripts/components/NetworkComponent.js"></script>
+    <script src="scripts/components/ParticleSystem.js"></script>
+    <script src="scripts/components/AnimationComponent.js"></script>
+    <script src="scripts/components/TerrainComponent.js"></script>
+    <script src="scripts/components/WaterComponent.js"></script>
+    <script src="scripts/components/SkyboxComponent.js"></script>
+    <script src="scripts/components/UIComponent.js"></script>
+    
+    <script src="scripts/utils/FileUtils.js"></script>
+    <script src="scripts/utils/ImageUtils.js"></script>
+    <script src="scripts/utils/AudioUtils.js"></script>
+    <script src="scripts/utils/Compression.js"></script>
+    <script src="scripts/utils/Encryption.js"></script>
+    
+    <script src="scripts/main.js"></script>
+</body>
+</html>
