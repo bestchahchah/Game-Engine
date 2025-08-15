@@ -1,0 +1,36 @@
+{
+  "name": "advanced-web-game-engine",
+  "version": "1.0.0",
+  "description": "A comprehensive web-based game engine similar to Unity and Unreal Engine",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "dev": "python3 -m http.server 8000",
+    "serve": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "game-engine",
+    "webgl",
+    "3d",
+    "game-development",
+    "unity",
+    "unreal",
+    "javascript",
+    "web"
+  ],
+  "author": "Advanced Web Game Engine Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/advanced-web-game-engine.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/advanced-web-game-engine/issues"
+  },
+  "homepage": "https://github.com/your-username/advanced-web-game-engine#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}
