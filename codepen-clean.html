@@ -1,0 +1,172 @@
+<!-- HTML SECTION - Copy this to CodePen HTML -->
+<div id="app">
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-content">
+      <div class="engine-logo">
+        <i class="fas fa-gamepad"></i>
+        <h1>Advanced Web Game Engine</h1>
+      </div>
+      <div class="loading-bar">
+        <div class="loading-progress"></div>
+      </div>
+      <div class="loading-text">Initializing Engine...</div>
+    </div>
+  </div>
+
+  <!-- Main Editor Interface -->
+  <div id="editor" class="editor-container" style="display: none;">
+    <!-- Top Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button id="new-project" class="toolbar-btn">
+          <i class="fas fa-plus"></i> New Project
+        </button>
+        <button id="play-btn" class="toolbar-btn play-btn">
+          <i class="fas fa-play"></i> Play
+        </button>
+        <button id="pause-btn" class="toolbar-btn">
+          <i class="fas fa-pause"></i> Pause
+        </button>
+        <button id="stop-btn" class="toolbar-btn">
+          <i class="fas fa-stop"></i> Stop
+        </button>
+      </div>
+      <div class="toolbar-center">
+        <div class="project-info">
+          <span id="project-name">Game Engine Demo</span>
+        </div>
+      </div>
+      <div class="toolbar-right">
+        <button id="settings-btn" class="toolbar-btn">
+          <i class="fas fa-cog"></i>
+        </button>
+        <button id="help-btn" class="toolbar-btn">
+          <i class="fas fa-question-circle"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Left Panel - Project Explorer -->
+      <div class="panel project-explorer">
+        <div class="panel-header">
+          <h3><i class="fas fa-folder"></i> Project Explorer</h3>
+          <div class="panel-controls">
+            <button class="panel-btn" id="add-asset">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+        <div class="panel-content">
+          <div id="project-tree" class="project-tree">
+            <div class="tree-item">
+              <i class="fas fa-folder"></i>
+              <span>Assets</span>
+            </div>
+            <div class="tree-item">
+              <i class="fas fa-folder"></i>
+              <span>Scenes</span>
+            </div>
+            <div class="tree-item">
+              <i class="fas fa-folder"></i>
+              <span>Scripts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Panel - Scene View -->
+      <div class="panel scene-view">
+        <div class="panel-header">
+          <h3><i class="fas fa-cube"></i> Scene View</h3>
+          <div class="panel-controls">
+            <button class="panel-btn" id="translate-tool" title="Translate Tool">
+              <i class="fas fa-arrows-alt"></i>
+            </button>
+            <button class="panel-btn" id="rotate-tool" title="Rotate Tool">
+              <i class="fas fa-redo"></i>
+            </button>
+            <button class="panel-btn" id="scale-tool" title="Scale Tool">
+              <i class="fas fa-expand-arrows-alt"></i>
+            </button>
+          </div>
+        </div>
+        <div class="panel-content">
+          <canvas id="scene-canvas" class="scene-canvas"></canvas>
+          <div class="scene-overlay">
+            <div class="scene-stats">
+              <span id="fps-counter">FPS: 60</span>
+              <span id="draw-calls">Draw Calls: 0</span>
+              <span id="triangle-count">Triangles: 0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel - Inspector -->
+      <div class="panel inspector">
+        <div class="panel-header">
+          <h3><i class="fas fa-cogs"></i> Inspector</h3>
+        </div>
+        <div class="panel-content">
+          <div id="inspector-content" class="inspector-content">
+            <div class="inspector-section">
+              <h4>Transform</h4>
+              <div class="inspector-field">
+                <label>Position</label>
+                <div class="vector-input">
+                  <input type="number" value="0" step="0.1" placeholder="X">
+                  <input type="number" value="0" step="0.1" placeholder="Y">
+                  <input type="number" value="0" step="0.1" placeholder="Z">
+                </div>
+              </div>
+              <div class="inspector-field">
+                <label>Rotation</label>
+                <div class="vector-input">
+                  <input type="number" value="0" step="1" placeholder="X">
+                  <input type="number" value="0" step="1" placeholder="Y">
+                  <input type="number" value="0" step="1" placeholder="Z">
+                </div>
+              </div>
+              <div class="inspector-field">
+                <label>Scale</label>
+                <div class="vector-input">
+                  <input type="number" value="1" step="0.1" placeholder="X">
+                  <input type="number" value="1" step="0.1" placeholder="Y">
+                  <input type="number" value="1" step="0.1" placeholder="Z">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Panel - Console -->
+    <div class="panel console">
+      <div class="panel-header">
+        <h3><i class="fas fa-terminal"></i> Console</h3>
+        <div class="panel-controls">
+          <button class="panel-btn" id="clear-console">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div class="panel-content">
+        <div id="console-output" class="console-output">
+          <div class="console-line info">🎮 Advanced Web Game Engine v1.0.0</div>
+          <div class="console-line info">✅ Engine initialized successfully</div>
+          <div class="console-line info">🚀 Ready to create amazing games!</div>
+        </div>
+        <div class="console-input">
+          <input type="text" id="console-input" placeholder="Enter command...">
+          <button id="console-execute">
+            <i class="fas fa-play"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

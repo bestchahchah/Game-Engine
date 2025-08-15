@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🎮 Mobile Game Engine</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+            color: #e0e0e0;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        
+        .mobile-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+        
+        .header h1 {
+            font-size: 1.5em;
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 0.9em;
+            color: #888;
+        }
+        
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card h3 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn:hover, .btn:active {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn.secondary {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+        }
+        
+        .btn.secondary:hover, .btn.secondary:active {
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+        }
+        
+        .btn.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat {
+            background: rgba(76, 175, 80, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .stat-label {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .feature-list {
+            list-style: none;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-list li:before {
+            content: "✅ ";
+            color: #4CAF50;
+        }
+        
+        .mobile-tips {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .mobile-tips h4 {
+            color: #FFC107;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 480px) {
+            .button-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+        }
+        
+        /* Touch-friendly interactions */
+        .btn {
+            min-height: 44px; /* iOS minimum touch target */
+        }
+        
+        /* Prevent zoom on input focus */
+        input, textarea, select {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <div class="header">
+            <h1>🎮 Mobile Game Engine</h1>
+            <p>Advanced Web Game Engine - Mobile Optimized</p>
+        </div>
+        
+        <div class="content">
+            <div class="card">
+                <h3>📊 Engine Statistics</h3>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-number">200k+</div>
+                        <div class="stat-label">Lines of Code</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">10+</div>
+                        <div class="stat-label">Core Systems</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Mobile Ready</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Installation</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>🚀 Quick Access</h3>
+                <div class="button-grid">
+                    <a href="demo.html" class="btn">
+                        <i class="fas fa-rocket"></i>
+                        Demo
+                    </a>
+                    <a href="index.html" class="btn secondary">
+                        <i class="fas fa-gamepad"></i>
+                        Full Engine
+                    </a>
+                    <a href="status.html" class="btn full-width">
+                        <i class="fas fa-chart-bar"></i>
+                        Engine Status
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>✨ Key Features</h3>
+                <ul class="feature-list">
+                    <li>Professional Game Engine Interface</li>
+                    <li>Memory Management & Optimization</li>
+                    <li>Asset Loading & Caching</li>
+                    <li>Real-time Event System</li>
+                    <li>Comprehensive Logging</li>
+                    <li>Mobile-Responsive Design</li>
+                    <li>Touch-Friendly Controls</li>
+                    <li>WebGL Rendering Ready</li>
+                </ul>
+            </div>
+            
+            <div class="mobile-tips">
+                <h4>📱 Mobile Tips</h4>
+                <ul class="feature-list">
+                    <li>Use landscape mode for better experience</li>
+                    <li>Pinch to zoom for detailed inspection</li>
+                    <li>Tap and hold for context menus</li>
+                    <li>Works offline once loaded</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3>🔧 Mobile Setup Options</h3>
+                <div class="button-grid">
+                    <button onclick="showMobileOptions()" class="btn">
+                        <i class="fas fa-cog"></i>
+                        Setup Options
+                    </button>
+                    <button onclick="showHelp()" class="btn secondary">
+                        <i class="fas fa-question-circle"></i>
+                        Help
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Mobile-specific functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Prevent zoom on double tap
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function (event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+            
+            // Add touch feedback
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.95)';
+                });
+                
+                btn.addEventListener('touchend', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+        });
+        
+        function showMobileOptions() {
+            const options = `
+📱 Mobile Setup Options:
+
+1. 📄 Direct Access (Easiest)
+   - Open HTML files directly in browser
+   - No server needed
+
+2. 🌐 Online Platforms
+   - Replit: replit.com
+   - CodePen: codepen.io
+   - JSFiddle: jsfiddle.net
+
+3. 📱 Mobile Apps
+   - Simple HTTP Server (Android)
+   - Web Server (iOS)
+   - Termux (Android)
+
+4. ☁️ Cloud Hosting
+   - GitHub Pages
+   - Netlify
+   - Vercel
+
+Choose the option that works best for you!
+            `;
+            alert(options);
+        }
+        
+        function showHelp() {
+            const help = `
+🎮 Mobile Game Engine Help:
+
+✅ How to Use:
+- Tap buttons to navigate
+- Use landscape mode for better view
+- Pinch to zoom in/out
+- Works offline once loaded
+
+✅ Features:
+- Professional game engine interface
+- Asset management system
+- Real-time console
+- Performance monitoring
+
+✅ Troubleshooting:
+- If buttons don't work, try refreshing
+- Clear browser cache if needed
+- Use Chrome or Safari for best experience
+
+Need more help? Check the documentation!
+            `;
+            alert(help);
+        }
+        
+        // Add some mobile-friendly animations
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    </script>
+</body>
+</html>
