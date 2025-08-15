@@ -635,8 +635,8 @@
     </div>
 
     <script>
-        // Simple Game Engine for WebForge
-        class SimpleGameEngine {
+        // Advanced Game Engine for WebForge
+        class WebForgeEngine {
             constructor() {
                 this.isInitialized = false;
                 this.isRunning = false;
@@ -645,11 +645,34 @@
                 this.frameCount = 0;
                 this.lastFpsUpdate = 0;
                 
+                // Core systems
+                this.renderer = null;
+                this.physics = null;
+                this.audio = null;
+                this.input = null;
+                this.scene = null;
+                this.camera = null;
+                
+                // Game objects
+                this.gameObjects = new Map();
+                this.nextObjectId = 1;
+                
+                // Rendering
+                this.canvas = null;
+                this.gl = null;
+                this.shaderProgram = null;
+                
                 this.init();
             }
             
             init() {
                 console.log('🎮 Initializing WebForge Game Engine...');
+                
+                // Initialize WebGL
+                this.initWebGL();
+                
+                // Create default scene
+                this.createDefaultScene();
                 
                 // Hide loading screen after 2 seconds
                 setTimeout(() => {
@@ -658,6 +681,164 @@
                     this.isInitialized = true;
                     console.log('✅ Engine initialized successfully');
                 }, 2000);
+            }
+            
+            initWebGL() {
+                this.canvas = document.getElementById('scene-canvas');
+                if (!this.canvas) return;
+                
+                this.gl = this.canvas.getContext('webgl2') || this.canvas.getContext('webgl');
+                if (!this.gl) {
+                    console.error('WebGL not supported');
+                    return;
+                }
+                
+                // Set canvas size
+                this.canvas.width = this.canvas.clientWidth;
+                this.canvas.height = this.canvas.clientHeight;
+                
+                // Create shaders
+                this.createShaders();
+                
+                // Set up WebGL state
+                this.gl.enable(this.gl.DEPTH_TEST);
+                this.gl.enable(this.gl.CULL_FACE);
+                this.gl.cullFace(this.gl.BACK);
+                this.gl.clearColor(0.1, 0.1, 0.1, 1.0);
+                
+                console.log('✅ WebGL initialized');
+            }
+            
+            createShaders() {
+                const vertexShaderSource = `
+                    attribute vec3 a_position;
+                    attribute vec3 a_normal;
+                    uniform mat4 u_modelViewMatrix;
+                    uniform mat4 u_projectionMatrix;
+                    uniform mat3 u_normalMatrix;
+                    varying vec3 v_normal;
+                    varying vec3 v_position;
+                    void main() {
+                        v_position = vec3(u_modelViewMatrix * vec4(a_position, 1.0));
+                        v_normal = u_normalMatrix * a_normal;
+                        gl_Position = u_projectionMatrix * u_modelViewMatrix * vec4(a_position, 1.0);
+                    }
+                `;
+                
+                const fragmentShaderSource = `
+                    precision mediump float;
+                    varying vec3 v_normal;
+                    varying vec3 v_position;
+                    uniform vec3 u_lightPosition;
+                    uniform vec3 u_lightColor;
+                    uniform vec3 u_materialColor;
+                    void main() {
+                        vec3 normal = normalize(v_normal);
+                        vec3 lightDir = normalize(u_lightPosition - v_position);
+                        float diff = max(dot(normal, lightDir), 0.0);
+                        vec3 diffuse = diff * u_lightColor;
+                        vec3 ambient = 0.1 * u_lightColor;
+                        vec3 color = (ambient + diffuse) * u_materialColor;
+                        gl_FragColor = vec4(color, 1.0);
+                    }
+                `;
+                
+                const vertexShader = this.createShader(this.gl.VERTEX_SHADER, vertexShaderSource);
+                const fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, fragmentShaderSource);
+                
+                this.shaderProgram = this.gl.createProgram();
+                this.gl.attachShader(this.shaderProgram, vertexShader);
+                this.gl.attachShader(this.shaderProgram, fragmentShader);
+                this.gl.linkProgram(this.shaderProgram);
+                
+                if (!this.gl.getProgramParameter(this.shaderProgram, this.gl.LINK_STATUS)) {
+                    console.error('Shader program link error:', this.gl.getProgramInfoLog(this.shaderProgram));
+                }
+            }
+            
+            createShader(type, source) {
+                const shader = this.gl.createShader(type);
+                this.gl.shaderSource(shader, source);
+                this.gl.compileShader(shader);
+                
+                if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+                    console.error('Shader compile error:', this.gl.getShaderInfoLog(shader));
+                }
+                
+                return shader;
+            }
+            
+            createDefaultScene() {
+                // Create camera
+                this.camera = {
+                    position: { x: 0, y: 0, z: 5 },
+                    rotation: { x: 0, y: 0, z: 0 },
+                    fov: 75,
+                    near: 0.1,
+                    far: 1000,
+                    viewMatrix: new Array(16),
+                    projectionMatrix: new Array(16)
+                };
+                
+                // Create some demo objects
+                this.createCube({ x: -2, y: 0, z: 0 }, { r: 1, g: 0.5, b: 0.5 });
+                this.createCube({ x: 0, y: 0, z: 0 }, { r: 0.5, g: 1, b: 0.5 });
+                this.createCube({ x: 2, y: 0, z: 0 }, { r: 0.5, g: 0.5, b: 1 });
+            }
+            
+            createCube(position, color) {
+                const object = {
+                    id: this.nextObjectId++,
+                    type: 'cube',
+                    position: { ...position },
+                    rotation: { x: 0, y: 0, z: 0 },
+                    scale: { x: 1, y: 1, z: 1 },
+                    color: color,
+                    vertices: this.createCubeVertices(),
+                    indices: this.createCubeIndices(),
+                    vertexBuffer: null,
+                    indexBuffer: null
+                };
+                
+                // Create buffers
+                object.vertexBuffer = this.gl.createBuffer();
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, object.vertexBuffer);
+                this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(object.vertices), this.gl.STATIC_DRAW);
+                
+                object.indexBuffer = this.gl.createBuffer();
+                this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, object.indexBuffer);
+                this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(object.indices), this.gl.STATIC_DRAW);
+                
+                this.gameObjects.set(object.id, object);
+                return object;
+            }
+            
+            createCubeVertices() {
+                return [
+                    // Front face
+                    -1, -1,  1,  0, 0, 1,  1, -1,  1,  0, 0, 1,  1,  1,  1,  0, 0, 1, -1,  1,  1,  0, 0, 1,
+                    // Back face
+                    -1, -1, -1,  0, 0, -1, -1,  1, -1,  0, 0, -1,  1,  1, -1,  0, 0, -1,  1, -1, -1,  0, 0, -1,
+                    // Top face
+                    -1,  1, -1,  0, 1, 0, -1,  1,  1,  0, 1, 0,  1,  1,  1,  0, 1, 0,  1,  1, -1,  0, 1, 0,
+                    // Bottom face
+                    -1, -1, -1,  0, -1, 0,  1, -1, -1,  0, -1, 0,  1, -1,  1,  0, -1, 0, -1, -1,  1,  0, -1, 0,
+                    // Right face
+                     1, -1, -1,  1, 0, 0,  1,  1, -1,  1, 0, 0,  1,  1,  1,  1, 0, 0,  1, -1,  1,  1, 0, 0,
+                    // Left face
+                    -1, -1, -1,  -1, 0, 0, -1, -1,  1,  -1, 0, 0, -1,  1,  1,  -1, 0, 0, -1,  1, -1,  -1, 0, 0
+                ];
+            }
+            
+            createCubeIndices() {
+                return [
+                    0,  1,  2,    0,  2,  3,   // front
+                    4,  5,  6,    4,  6,  7,   // back
+                    8,  9,  10,   8,  10, 11,  // top
+                    12, 13, 14,   12, 14, 15,  // bottom
+                    16, 17, 18,   16, 18, 19,  // right
+                    20, 21, 22,   20, 22, 23   // left
+                ];
             }
             
             hideLoadingScreen() {
@@ -777,19 +958,187 @@
                     }
                 }
                 
-                // Update draw calls and triangles (simulated)
+                // Update game objects
+                this.updateGameObjects(deltaTime);
+                
+                // Render scene
+                this.render();
+                
+                // Update stats
+                this.updateStats();
+                
+                requestAnimationFrame(() => this.update());
+            }
+            
+            updateGameObjects(deltaTime) {
+                this.gameObjects.forEach(object => {
+                    // Rotate cubes
+                    if (object.type === 'cube') {
+                        object.rotation.y += deltaTime * 0.5;
+                        object.rotation.x += deltaTime * 0.3;
+                    }
+                });
+            }
+            
+            render() {
+                if (!this.gl || !this.shaderProgram || !this.camera) return;
+                
+                // Clear canvas
+                this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+                
+                // Use shader program
+                this.gl.useProgram(this.shaderProgram);
+                
+                // Update camera matrices
+                this.updateCameraMatrices();
+                
+                // Get shader locations
+                const positionLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
+                const normalLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_normal');
+                const modelViewMatrixLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_modelViewMatrix');
+                const projectionMatrixLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_projectionMatrix');
+                const normalMatrixLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_normalMatrix');
+                const lightPositionLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_lightPosition');
+                const lightColorLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_lightColor');
+                const materialColorLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_materialColor');
+                
+                // Set projection matrix
+                this.gl.uniformMatrix4fv(projectionMatrixLocation, false, this.camera.projectionMatrix);
+                
+                // Set light properties
+                this.gl.uniform3f(lightPositionLocation, 0, 10, 0);
+                this.gl.uniform3f(lightColorLocation, 1, 1, 1);
+                
+                // Render each object
+                this.gameObjects.forEach(object => {
+                    this.renderObject(object, positionLocation, normalLocation, modelViewMatrixLocation, normalMatrixLocation, materialColorLocation);
+                });
+            }
+            
+            renderObject(object, positionLocation, normalLocation, modelViewMatrixLocation, normalMatrixLocation, materialColorLocation) {
+                // Calculate model-view matrix
+                const modelViewMatrix = this.calculateModelViewMatrix(object);
+                this.gl.uniformMatrix4fv(modelViewMatrixLocation, false, modelViewMatrix);
+                
+                // Calculate normal matrix
+                const normalMatrix = this.calculateNormalMatrix(modelViewMatrix);
+                this.gl.uniformMatrix3fv(normalMatrixLocation, false, normalMatrix);
+                
+                // Set material color
+                this.gl.uniform3f(materialColorLocation, object.color.r, object.color.g, object.color.b);
+                
+                // Bind vertex buffer
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, object.vertexBuffer);
+                this.gl.vertexAttribPointer(positionLocation, 3, this.gl.FLOAT, false, 24, 0);
+                this.gl.enableVertexAttribArray(positionLocation);
+                
+                // Bind normal buffer
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, object.vertexBuffer);
+                this.gl.vertexAttribPointer(normalLocation, 3, this.gl.FLOAT, false, 24, 12);
+                this.gl.enableVertexAttribArray(normalLocation);
+                
+                // Bind index buffer and draw
+                this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, object.indexBuffer);
+                this.gl.drawElements(this.gl.TRIANGLES, object.indices.length, this.gl.UNSIGNED_SHORT, 0);
+            }
+            
+            updateCameraMatrices() {
+                // Calculate view matrix
+                const viewMatrix = this.calculateViewMatrix();
+                
+                // Calculate projection matrix
+                const aspect = this.canvas.width / this.canvas.height;
+                const projectionMatrix = this.calculateProjectionMatrix(this.camera.fov, aspect, this.camera.near, this.camera.far);
+                
+                this.camera.viewMatrix = viewMatrix;
+                this.camera.projectionMatrix = projectionMatrix;
+            }
+            
+            calculateViewMatrix() {
+                const matrix = new Array(16);
+                
+                // Simple view matrix calculation
+                matrix[0] = 1; matrix[1] = 0; matrix[2] = 0; matrix[3] = 0;
+                matrix[4] = 0; matrix[5] = 1; matrix[6] = 0; matrix[7] = 0;
+                matrix[8] = 0; matrix[9] = 0; matrix[10] = 1; matrix[11] = 0;
+                matrix[12] = -this.camera.position.x;
+                matrix[13] = -this.camera.position.y;
+                matrix[14] = -this.camera.position.z;
+                matrix[15] = 1;
+                
+                return matrix;
+            }
+            
+            calculateProjectionMatrix(fov, aspect, near, far) {
+                const matrix = new Array(16);
+                const f = 1.0 / Math.tan(fov * Math.PI / 360);
+                
+                matrix[0] = f / aspect; matrix[1] = 0; matrix[2] = 0; matrix[3] = 0;
+                matrix[4] = 0; matrix[5] = f; matrix[6] = 0; matrix[7] = 0;
+                matrix[8] = 0; matrix[9] = 0; matrix[10] = (far + near) / (near - far);
+                matrix[11] = -1;
+                matrix[12] = 0; matrix[13] = 0; matrix[14] = (2 * far * near) / (near - far);
+                matrix[15] = 0;
+                
+                return matrix;
+            }
+            
+            calculateModelViewMatrix(object) {
+                const matrix = new Array(16);
+                
+                // Calculate rotation matrix
+                const cx = Math.cos(object.rotation.x);
+                const sx = Math.sin(object.rotation.x);
+                const cy = Math.cos(object.rotation.y);
+                const sy = Math.sin(object.rotation.y);
+                const cz = Math.cos(object.rotation.z);
+                const sz = Math.sin(object.rotation.z);
+                
+                // Rotation matrix
+                const rotMatrix = [
+                    (cy * cz) * object.scale.x, (cy * sz) * object.scale.x, -sy * object.scale.x, 0,
+                    (sx * sy * cz - cx * sz) * object.scale.y, (sx * sy * sz + cx * cz) * object.scale.y, sx * cy * object.scale.y, 0,
+                    (cx * sy * cz + sx * sz) * object.scale.z, (cx * sy * sz - sx * cz) * object.scale.z, cx * cy * object.scale.z, 0,
+                    object.position.x, object.position.y, object.position.z, 1
+                ];
+                
+                // Multiply with view matrix
+                const viewMatrix = this.camera.viewMatrix;
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        matrix[i * 4 + j] = 
+                            rotMatrix[i * 4 + 0] * viewMatrix[0 * 4 + j] +
+                            rotMatrix[i * 4 + 1] * viewMatrix[1 * 4 + j] +
+                            rotMatrix[i * 4 + 2] * viewMatrix[2 * 4 + j] +
+                            rotMatrix[i * 4 + 3] * viewMatrix[3 * 4 + j];
+                    }
+                }
+                
+                return matrix;
+            }
+            
+            calculateNormalMatrix(modelViewMatrix) {
+                const normalMatrix = new Array(9);
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        normalMatrix[i * 3 + j] = modelViewMatrix[i * 4 + j];
+                    }
+                }
+                return normalMatrix;
+            }
+            
+            updateStats() {
                 const drawCallsElement = document.getElementById('draw-calls');
                 const triangleElement = document.getElementById('triangle-count');
                 
                 if (drawCallsElement) {
-                    drawCallsElement.textContent = `Draw Calls: ${Math.floor(Math.random() * 100)}`;
+                    drawCallsElement.textContent = `Draw Calls: ${this.gameObjects.size}`;
                 }
                 
                 if (triangleElement) {
-                    triangleElement.textContent = `Triangles: ${Math.floor(Math.random() * 1000)}`;
+                    const totalTriangles = this.gameObjects.size * 12; // 12 triangles per cube
+                    triangleElement.textContent = `Triangles: ${totalTriangles}`;
                 }
-                
-                requestAnimationFrame(() => this.update());
             }
             
             executeConsoleCommand() {
@@ -802,15 +1151,84 @@
                 this.log(`> ${command}`);
                 
                 try {
-                    const result = eval(command);
-                    if (result !== undefined) {
-                        this.log(result);
+                    // Handle engine-specific commands
+                    if (command.startsWith('create')) {
+                        this.handleCreateCommand(command);
+                    } else if (command.startsWith('camera')) {
+                        this.handleCameraCommand(command);
+                    } else if (command.startsWith('list')) {
+                        this.handleListCommand(command);
+                    } else if (command.startsWith('help')) {
+                        this.showHelp();
+                    } else if (command.startsWith('clear')) {
+                        this.clearConsole();
+                    } else if (command.startsWith('fps')) {
+                        this.log(`Current FPS: ${this.fps}`);
+                    } else if (command.startsWith('objects')) {
+                        this.log(`Total objects: ${this.gameObjects.size}`);
+                    } else {
+                        // Try to evaluate as JavaScript
+                        const result = eval(command);
+                        if (result !== undefined) {
+                            this.log(result);
+                        }
                     }
                 } catch (error) {
                     this.log(`Error: ${error.message}`, 'error');
                 }
                 
                 input.value = '';
+            }
+            
+            handleCreateCommand(command) {
+                const parts = command.split(' ');
+                if (parts[1] === 'cube') {
+                    const x = parseFloat(parts[2]) || 0;
+                    const y = parseFloat(parts[3]) || 0;
+                    const z = parseFloat(parts[4]) || 0;
+                    const r = parseFloat(parts[5]) || 1;
+                    const g = parseFloat(parts[6]) || 1;
+                    const b = parseFloat(parts[7]) || 1;
+                    
+                    this.createCube({ x, y, z }, { r, g, b });
+                    this.log(`Created cube at (${x}, ${y}, ${z}) with color (${r}, ${g}, ${b})`);
+                } else {
+                    this.log('Usage: create cube [x] [y] [z] [r] [g] [b]', 'warning');
+                }
+            }
+            
+            handleCameraCommand(command) {
+                const parts = command.split(' ');
+                if (parts[1] === 'position') {
+                    const x = parseFloat(parts[2]);
+                    const y = parseFloat(parts[3]);
+                    const z = parseFloat(parts[4]);
+                    
+                    if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+                        this.camera.position.x = x;
+                        this.camera.position.y = y;
+                        this.camera.position.z = z;
+                        this.log(`Camera moved to (${x}, ${y}, ${z})`);
+                    } else {
+                        this.log('Usage: camera position [x] [y] [z]', 'warning');
+                    }
+                } else if (parts[1] === 'info') {
+                    this.log(`Camera position: (${this.camera.position.x}, ${this.camera.position.y}, ${this.camera.position.z})`);
+                } else {
+                    this.log('Usage: camera [position|info]', 'warning');
+                }
+            }
+            
+            handleListCommand(command) {
+                const parts = command.split(' ');
+                if (parts[1] === 'objects') {
+                    this.log('Game Objects:');
+                    this.gameObjects.forEach((object, id) => {
+                        this.log(`  ${id}: ${object.type} at (${object.position.x.toFixed(2)}, ${object.position.y.toFixed(2)}, ${object.position.z.toFixed(2)})`);
+                    });
+                } else {
+                    this.log('Usage: list objects', 'warning');
+                }
             }
             
             clearConsole() {
@@ -837,13 +1255,32 @@
             }
             
             showHelp() {
-                alert('🎮 WebForge Help\n\nKeyboard Shortcuts:\n- Space: Play/Pause\n- F5: Refresh\n\nConsole Commands:\n- help: Show this help\n- version: Show engine version\n- clear: Clear console\n- fps: Show current FPS\n\nThis is a simplified demo version. The full engine includes many more features!');
+                this.log('🎮 WebForge Game Engine Help', 'info');
+                this.log('', 'info');
+                this.log('📋 Console Commands:', 'info');
+                this.log('  create cube [x] [y] [z] [r] [g] [b] - Create a colored cube', 'info');
+                this.log('  camera position [x] [y] [z] - Move camera', 'info');
+                this.log('  camera info - Show camera info', 'info');
+                this.log('  list objects - List all game objects', 'info');
+                this.log('  fps - Show current FPS', 'info');
+                this.log('  objects - Show object count', 'info');
+                this.log('  clear - Clear console', 'info');
+                this.log('  help - Show this help', 'info');
+                this.log('', 'info');
+                this.log('🎮 Features:', 'info');
+                this.log('  - Real-time 3D rendering with WebGL', 'info');
+                this.log('  - Interactive console with commands', 'info');
+                this.log('  - Dynamic object creation', 'info');
+                this.log('  - Camera controls', 'info');
+                this.log('  - Performance monitoring', 'info');
+                this.log('', 'info');
+                this.log('💡 Try: create cube 0 2 0 1 0 0', 'info');
             }
         }
 
         // Initialize the engine when the page loads
         document.addEventListener('DOMContentLoaded', () => {
-            window.gameEngine = new SimpleGameEngine();
+            window.gameEngine = new WebForgeEngine();
         });
     </script>
 </body>
